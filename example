@@ -1,0 +1,76 @@
+### **Example: Randomizing a Packet Class with Constraints**
+
+---
+
+#### **Step 1: Define the Class**
+
+```systemverilog
+class Packet;
+
+    // Random variables
+    rand bit [7:0] addr;
+    rand bit [15:0] data;
+    rand bit [1:0]  priority;
+
+    // Constraints
+    constraint addr_c {
+        addr inside {[10:100]};  // Address between 10 and 100
+    }
+
+    constraint data_c {
+        data % 2 == 0;           // Data must be even
+    }
+
+    constraint priority_c {
+        priority inside {0, 1, 2}; // Priority must be 0, 1, or 2
+    }
+
+endclass
+```
+
+---
+
+#### **Step 2: Testbench to Randomize and Display**
+
+```systemverilog
+module tb;
+
+    initial begin
+        Packet pkt = new();  // Create an object
+
+        // Generate 5 randomized packets
+        repeat (5) begin
+            if (pkt.randomize()) begin
+                $display("Packet -> addr: %0d, data: %0d, priority: %0d",
+                         pkt.addr, pkt.data, pkt.priority);
+            end else begin
+                $display("Randomization failed");
+            end
+        end
+    end
+
+endmodule
+```
+
+---
+
+### **Expected Output:**
+(Values will vary every time, but all will follow constraints)
+
+```
+Packet -> addr: 43, data: 826, priority: 1
+Packet -> addr: 87, data: 124, priority: 0
+Packet -> addr: 21, data: 302, priority: 2
+Packet -> addr: 11, data: 198, priority: 1
+Packet -> addr: 65, data: 774, priority: 0
+```
+
+---
+
+### **Explanation:**
+
+- **`addr`** is randomized between 10 and 100.
+- **`data`** is constrained to be **even**.
+- **`priority`** must be 0, 1, or 2.
+- `randomize()` is called on the object before each use.
+- If constraints are unsatisfiable, `randomize()` returns 0 (`false`).
